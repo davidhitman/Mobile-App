@@ -1,6 +1,8 @@
 
 from tkinter import *
 from tkinter import StringVar
+import sqlite3
+from datetime import datetime
 
 
 def show_frame(frame):
@@ -18,15 +20,55 @@ def login():
     username = my_entry1.get()
     password = my_entry2.get()
 
-    if username == "dav" and password == "123":
-        show_frame(front_page)
-        my_entry1.delete(0, END)
-        my_entry2.delete(0, END)
-    else:
-        print(22)
+    cursor.execute("select username, password from Users")
+    rows = cursor.fetchall()
+
+    for row in rows:
+        if username == row[0] and password == row[1]:
+            show_frame(front_page)
+           
+            error_label.config(text="")
+            my_entry1.delete(0, END)
+            my_entry2.delete(0, END)
+        
+        else:
+            error_label.config(text = "Worng Username or password")
 
 
-            
+def money_in(): 
+    time = datetime.now()
+
+    entered_amount = my_entry3.get()
+    selected_value = selected_sourceOption.get()
+    current_time = time.replace(microsecond=0)
+
+    data = (entered_amount, selected_value, current_time)
+    cursor.execute("INSERT INTO money_in (Amount, source, date_and_Time) VALUES (?, ?, ?)", data)
+    connection.commit()
+    moneyin_message.config(text = "Success")
+
+def money_out(): 
+    time = datetime.now()
+    current_time = time.replace(microsecond=0)
+    entered_amount = my_entry.get()
+    selected_value = selected_categoryOption.get()
+    selected_value1 = selected_meansOption.get()
+
+
+    data = (entered_amount, selected_value1, selected_value, current_time)
+    cursor.execute("INSERT INTO money_out ( amount, transaction_means, category, date_and_Time) VALUES (?, ?, ?,?)", data)
+    connection.commit()
+    moneyout_message.config(text = "Success")
+
+def setBudget():
+    budget_entered = budget_entry.get()
+    cursor.execute("INSERT INTO budget (budget) VALUES (?,?)", budget_entered)
+    connection.commit()
+    budget_message.config(text = "Success")
+
+connection = sqlite3.connect('Mobile_app.db')    
+cursor = connection.cursor()
+
 window = Tk()
 window.title("Finance Tracker App")
 window.geometry("300x200")
@@ -41,6 +83,7 @@ my_entry1 = Entry(login_frame, placeholder = "Enter your username")
 my_entry2 = Entry(login_frame, placeholder = "Enter your password", show='*')
 
 my_button = Button(login_frame, text="LogIn", command=login)
+error_label = Label(login_frame, text="", fg='red')
     
 my_label1.grid(row=0, column=0)
 my_label2.grid(row=1, column=0)
@@ -48,6 +91,7 @@ my_label3.grid(row=3, column=0)
 my_entry1.grid(row=2, column=0)
 my_entry2.grid(row=4, column=0)
 my_button.grid(row=5, column=0)
+error_label.grid(row=6, column=0)
 
 login_frame.pack()
 
@@ -57,13 +101,24 @@ moneyIn_frame = Frame(window)
 
 my_label5 = Label(moneyIn_frame, text="Enter the Amount of money you earned")
 my_entry3 = Entry(moneyIn_frame, placeholder = "Enter the amount")
-my_button7 = Button(moneyIn_frame, text="Enter")
+moneyin_message = Label(moneyIn_frame, text="", fg='green')
+
+source_label = Label(moneyIn_frame, text="Source:")
+selected_sourceOption = StringVar()
+selected_sourceOption.set("Select an option") 
+options = ["Income", "Family help", "business profit"]
+source_dropdown = OptionMenu(moneyIn_frame, selected_sourceOption, *options)
+
+my_button7 = Button(moneyIn_frame, text="Enter", command= money_in)
 my_button8 = Button(moneyIn_frame, text="Back", command= lambda: show_frame(front_page))
 
 my_label5.grid(row=0, column=0)
 my_entry3.grid(row=1,column=0)
-my_button7.grid(row=2, column=0)
-my_button8.grid(row=2, column=1)
+source_label.grid(row=2,column=0)
+source_dropdown.grid(row=2,column=1)
+my_button7.grid(row=3, column=0)
+my_button8.grid(row=3, column=1)
+moneyin_message.grid(row=4, column=0)
 
 moneyIn_frame.pack()
 
@@ -79,6 +134,7 @@ my_button4 = Button(front_page, text="Transcation Report", command=lambda: show_
 my_button5 = Button(front_page, text="Transcation Summary", command=lambda: show_frame(summary_frame))
 my_button6 = Button(front_page, text="LogOut", command=lambda: show_frame(login_frame))
 
+
 my_label4.grid(row=0, column=0)
 my_button1.grid(row=1, column=0)
 my_button2.grid(row=2, column=0)
@@ -87,6 +143,7 @@ my_button4.grid(row=4, column=0)
 my_button5.grid(row=5, column=0)
 my_button6.grid(row=6, column=0)
 
+
 front_page.pack()
 
 ###################### MoneyOut_Frame ##################
@@ -94,22 +151,23 @@ front_page.pack()
 moneyOut_frame = Frame(window)
 
 my_label5 = Label(moneyOut_frame, text="Enter the Amount of money you spent")
-my_entry = Entry(moneyOut_frame)
+my_entry = Entry(moneyOut_frame, placeholder="Enter Amount")
 
 my_label6 = Label(moneyOut_frame, text="transaction means")
-selected_option = StringVar()
-selected_option.set("Select an option") 
+selected_meansOption = StringVar()
+selected_meansOption.set("Select an option") 
 options = ["Mobile Money", "Bank Transfer", "Credit/Debit card", "Cash"]
-dropdown = OptionMenu(moneyOut_frame, selected_option, *options)
+dropdown = OptionMenu(moneyOut_frame, selected_meansOption, *options)
 
 my_label7 = Label(moneyOut_frame, text="Category")
-selected_option = StringVar()
-selected_option.set("Select an option") 
+selected_categoryOption = StringVar()
+selected_categoryOption.set("Select an option") 
 options = ["Entertainment", "Groceries", "Transportation", "Work"]
-dropdown1 = OptionMenu(moneyOut_frame, selected_option, *options)
+dropdown1 = OptionMenu(moneyOut_frame, selected_categoryOption, *options)
 
-my_button9 = Button(moneyOut_frame, text="Enter")
+my_button9 = Button(moneyOut_frame, text="Enter", command=money_out)
 back_button = Button(moneyOut_frame, text="Back", command= lambda: show_frame(front_page))
+moneyout_message = Label(moneyOut_frame, text="think", fg='green')
 
 ### add a sub category
 my_label5.grid(row=0, column=0)
@@ -120,6 +178,7 @@ my_label7.grid(row=3, column=0)
 dropdown1.grid(row=3, column=1)
 my_button9.grid(row=4, column=0)
 back_button.grid(row=4, column=1)
+moneyout_message.grid(row=5, column=0)
 
 moneyOut_frame.pack()
 
@@ -128,13 +187,15 @@ budget_frame = Frame(window)
 
 budget_label = Label(budget_frame, text="Enter the Budget you want to set")
 budget_entry = Entry(budget_frame, placeholder="Enter the Amount")
-budget_button = Button(budget_frame, text="Enter")
+budget_button = Button(budget_frame, text="Enter",command=setBudget)
 budget_button1 = Button(budget_frame, text="Back", command= lambda: show_frame(front_page))
+budget_message = Label(budget_frame, text="", fg='green')
 
 budget_label.grid(row=0, column=0)
 budget_entry.grid(row=1, column=0)
 budget_button.grid(row=2, column=0)
 budget_button1.grid(row=2, column=1)
+budget_message.grid(row=3, column=0)
 
 budget_frame.pack()
 
