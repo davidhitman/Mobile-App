@@ -1,5 +1,5 @@
 
-#### do the visualisation and add multiple users to the system including registration, and make the system look presentable
+####    and make the system look presentable(add one extra visulisation) and add multiple users to the system including registration, and add commenets
 
 
 from tkinter import *
@@ -7,6 +7,8 @@ from tkinter import StringVar
 import sqlite3
 from datetime import datetime
 from tkinter import ttk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 def show_frame(frame):
@@ -45,7 +47,7 @@ def login():
     for row in rows:
         if username == row[0] and password == row[1]:
             show_frame(front_page)
-            budget_front_page_label.config(text= "the budget you set is:"+ stored_budget +","+" you have:"+ str(remain) + "left to reach your budget limit")
+            budget_front_page_label.config(text=" you have:"+ str(remain) + "left to reach your budget limit")
             if remain <=(remain * 0.15):
                 budget_front_page_label.config(fg = 'red')
             error_label.config(text="")
@@ -75,7 +77,7 @@ def money_out():
     entered_amount = my_entry.get()
     selected_value = selected_categoryOption.get()
     selected_value1 = selected_meansOption.get()
-    id = "34"
+    id = "39"
 
     data = (entered_amount, selected_value1, selected_value, current_time, id)
     cursor.execute("INSERT INTO money_out ( amount, transcation_means, category, date_and_Time, Id) VALUES (?, ?, ?,?, ?)", data)
@@ -153,7 +155,47 @@ def show_report():
     money_in_table = create_table(report_frame, "Money In", money_in_data, In_columns, 0)
     money_out_table = create_table(report_frame, "Money Out", money_out_data, Out_columns, 3)
 
+def visualisation():
+    Sday1 = summary_entry1.get()
+    Smonth1 = summary_entry2.get()
+    Syear1 = summary_entry3.get()
 
+    Eday1 = summary_entry4.get()
+    Emonth1 = summary_entry5.get()
+    Eyear1 = summary_entry6.get()
+
+    def create_chart (parent,Amounts, categories):
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.pie(Amounts,labels=categories, autopct='%1.1f%%', textprops={'fontsize': 5})
+        ax.set_title('Expenditure Pie Chart')
+
+        canvas = FigureCanvasTkAgg(fig, master=summary_frame)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=4, column=0)
+    
+    start_date =  f"{Syear1}-{int(Smonth1):02d}-{int(Sday1):02d}"
+    end_date = f"{Eyear1}-{int(Emonth1):02d}-{int(Eday1):02d}"
+    statement = "SELECT  Amount , category , date_and_time from money_out "
+    cursor.execute(statement)
+    data = cursor.fetchall()
+
+    categories = []
+    Amounts = []
+    
+    for line in data:
+        date_and_time_set = line[2].split()[0]
+        if date_and_time_set >= start_date and date_and_time_set <= end_date:
+            amount = line[0]
+            number = amount.replace(",", "")
+        if line[1] not in categories:
+            Amounts.append(int(number))
+            categories.append(line[1])
+        else: 
+            index = categories.index(line[1])
+            Amounts[index] += int(number)
+
+    create_chart(window, Amounts, categories)
+            
 
 
 
@@ -389,7 +431,7 @@ summary_entry4 = Entry(summary_frame, width=2)
 summary_entry5 = Entry(summary_frame, width=2)
 summary_entry6 = Entry(summary_frame, width=2)
 
-summary_button = Button(summary_frame, text="Display")
+summary_button = Button(summary_frame, text="Display", command=visualisation)
 summary_button1 = Button(summary_frame, text="Back",  command= lambda: show_frame(front_page))
 
 summary_label.grid(row=0, column=0)
@@ -407,7 +449,7 @@ summary_entry4.grid(row=2,column=2)
 summary_label7.grid(row=2, column=3)
 summary_entry5.grid(row=2, column=4)
 summary_label8.grid(row=2, column=5)
-summary_entry5.grid(row=2, column=6)
+summary_entry6.grid(row=2, column=6)
 
 summary_button.grid(row=3,column=0)
 summary_button1.grid(row=3,column=1)
