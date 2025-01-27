@@ -9,6 +9,7 @@ from datetime import datetime
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import font
 
 
 def show_frame(frame):
@@ -20,6 +21,23 @@ def show_frame(frame):
     report_frame.pack_forget()
     summary_frame.pack_forget()
     frame.pack(fill='both', expand=True)
+
+def money_in_dispaly():
+    window.geometry("480x240")
+    show_frame(moneyIn_frame)
+
+def front_page_display():
+    window.geometry("320x440")
+    show_frame(front_page)
+
+def log_in_display():
+    window.geometry("300x400")
+    show_frame(login_frame)
+
+def show_money_out_display():
+    window.geometry("320x300")
+    show_frame(moneyOut_frame)
+
 
 
 def login():
@@ -46,10 +64,10 @@ def login():
 
     for row in rows:
         if username == row[0] and password == row[1]:
+            window.geometry("320x440")
             show_frame(front_page)
-            budget_front_page_label.config(text=" you have:"+ str(remain) + "left to reach your budget limit")
             if remain <=(remain * 0.15):
-                budget_front_page_label.config(fg = 'red')
+                budget_front_page_label.config(text=" Warning: Your are about to reach your budget ", fg= "red")
             error_label.config(text="")
             my_entry1.delete(0, END)
             my_entry2.delete(0, END)
@@ -64,7 +82,7 @@ def money_in():
     entered_amount = my_entry3.get()
     selected_value = selected_sourceOption.get()
     current_time = time.replace(microsecond=0)
-    id = "34"
+    id = "42"
 
     data = (entered_amount, selected_value, current_time, id)
     cursor.execute("INSERT INTO money_in (Amount, source, date_and_Time, Id) VALUES (?, ?, ?, ?)", data)
@@ -77,7 +95,7 @@ def money_out():
     entered_amount = my_entry.get()
     selected_value = selected_categoryOption.get()
     selected_value1 = selected_meansOption.get()
-    id = "39"
+    id = "48"
 
     data = (entered_amount, selected_value1, selected_value, current_time, id)
     cursor.execute("INSERT INTO money_out ( amount, transcation_means, category, date_and_Time, Id) VALUES (?, ?, ?,?, ?)", data)
@@ -204,117 +222,194 @@ cursor = connection.cursor()
 
 window = Tk()
 window.title("Finance Tracker App")
-window.geometry("300x200")
+window.geometry("300x400")
 
-###########################################logIn frame #####################################
-login_frame = Frame(window)
+###########################################logIn frame ########################################################################################
+# create frames to be used in the login section
+login_frame = Frame(window, bg="white")
+login_label_frame = Frame(login_frame, bg="white")
+second_frame =Frame(login_frame, bg="white")
+center_frame = Frame(login_frame, bg="white")
+bottom_frame = Frame(login_frame, bg="white")
 
-my_label1 = Label(login_frame, text="Login")
-my_label2 = Label(login_frame, text="Username")
-my_label3 = Label(login_frame, text="Password")
-my_entry1 = Entry(login_frame, placeholder = "Enter your username")
-my_entry2 = Entry(login_frame, placeholder = "Enter your password", show='*')
+# create the labels to be used in the login frame
+my_label1 = Label(login_label_frame, text="Login", bg="white")
+my_label1.config(font=("Helvetica", 25, "bold"))
+label_create_accout = Label( second_frame, text="Need an account?", bg="white")
+label_create_accout1 = Label( second_frame, text="Create an account", fg="Teal", bg="white")
+label_create_accout1.config(font=("Helvetica", 10, "underline"))
+my_label2 = Label(center_frame, text="Username", bg="white")
+my_label2.config(font=("Helvetica", 10, "bold"))
+my_label3 = Label(center_frame, text="Password", bg="white")
+my_label3.config(font=("Helvetica", 10,"bold"))
+error_label = Label(center_frame, text="", fg="red", bg="white")
+forgot_label = Label(bottom_frame, text="Forgot username?", fg="Teal", bg="white")
+forgot_label.config(font=("Helvetica", 10, "underline"))
+forgot_label1 = Label(bottom_frame, text="Forgot password?", fg="Teal", bg="white")
+forgot_label1.config(font=("Helvetica", 10, "underline"))
 
-my_button = Button(login_frame, text="LogIn", command=login)
-error_label = Label(login_frame, text="", fg='red')
-    
-my_label1.grid(row=0, column=0)
-my_label2.grid(row=1, column=0)
-my_label3.grid(row=3, column=0)
-my_entry1.grid(row=2, column=0)
-my_entry2.grid(row=4, column=0)
-my_button.grid(row=5, column=0)
-error_label.grid(row=6, column=0)
+# create the entries to be used in the login frame
+my_entry1 = Entry(center_frame, borderwidth=1, relief="solid", highlightbackground="white")
+my_entry2 = Entry(center_frame, show='*', borderwidth=0.5, relief="solid", highlightbackground="white")
 
+#create the button to be used in the login frame
+my_button = Button(center_frame, text="LogIn", highlightbackground="white", command=login)
+
+# pack the frames
+login_label_frame.pack() 
+second_frame.pack()
+center_frame.pack()
+bottom_frame.pack()
 login_frame.pack()
 
-#######################################moneyIn_Frame#######################################
+# grid the labels
+my_label1.pack(pady=10)
+label_create_accout.grid(row=0, column=0, pady=20)
+label_create_accout1.grid(row=0, column=1)
+my_label2.grid(row=1, column=0)
+my_label3.grid(row=3, column=0)
+forgot_label.grid(row=0,column=0, pady=15, padx=10)
+forgot_label1.grid(row=0,column=1, pady=15, padx=10)
+error_label.grid(row=6, column=0)
 
+# grid the entries
+my_entry1.grid(row=2, column=0, ipadx=30, ipady=4)
+my_entry2.grid(row=4, column=0, ipadx=30, ipady=4)
+
+#  grid the button
+my_button.grid(row=5, column=0, ipady=7, ipadx=15, pady=10)
+
+
+####################################### front page frame #################################################################################
+# frames to be used
+front_page = Frame(window, bg="white")
+upper_frame = Frame(front_page, bg="white")
+budget_frame = Frame(front_page, bg="white")
+center_frame= Frame(front_page, bg="white")
+
+# labes to be used
+my_label4 = Label(upper_frame, text="Select what action you want to do", bg="white")
+budget_front_page_label = Label(budget_frame, text="", bg="white")
+
+# buttons 
+my_button1 = Button(center_frame, text="MoneyIn", highlightbackground="white", command= money_in_dispaly)
+my_button2 = Button(center_frame, text="MoneyOut", highlightbackground="white",command= show_money_out_display)
+my_button3 = Button(center_frame, text="Set Budget", highlightbackground="white",command=lambda: show_frame(budget_frame) )
+my_button4 = Button(center_frame, text="Transcation Report", highlightbackground="white",command=lambda: show_frame(report_frame))
+my_button5 = Button(center_frame, text="Transcation Summary",highlightbackground="white",command=lambda: show_frame(summary_frame))
+my_button6 = Button(center_frame, text="LogOut",highlightbackground="white",command=log_in_display)
+
+# grid labels, and buttons
+my_label4.grid(row=0, column=0)
+budget_front_page_label.grid(row=0, column=0)
+my_button1.grid(row=0, column=0, ipady=7, ipadx=15, pady=10)
+my_button2.grid(row=1, column=0, ipady=7, ipadx=15, pady=10)
+my_button3.grid(row=2, column=0, ipady=7, ipadx=15, pady=10)
+my_button4.grid(row=3, column=0, ipady=7, ipadx=15, pady=10)
+my_button5.grid(row=4, column=0, ipady=7, ipadx=15, pady=10)
+my_button6.grid(row=5, column=0, ipady=7, ipadx=15, pady=10)
+
+# pack frames
+upper_frame.pack()
+budget_frame.pack()
+center_frame.pack()
+front_page.pack()
+
+#######################################moneyIn_Frame########################################################################################
+# the section for adding money
+# frames
 moneyIn_frame = Frame(window)
+up_frame = Frame(moneyIn_frame)
+middle_frame = Frame(moneyIn_frame)
+button_frame = Frame(moneyIn_frame)
 
-my_label5 = Label(moneyIn_frame, text="Enter the Amount of money you earned")
-my_entry3 = Entry(moneyIn_frame, placeholder = "Enter the amount")
-moneyin_message = Label(moneyIn_frame, text="", fg='green')
+# labels
+my_label5 = Label(up_frame, text="Enter the Amount of money you earned")
+my_label5.config(font=("Helvetica", 10, "bold"))
+source_label = Label(middle_frame, text="Source:")
+source_label.config(font=("Helvetica", 10, "bold"))
+moneyin_message = Label(button_frame, text="", fg='green')
 
-source_label = Label(moneyIn_frame, text="Source:")
+# drop down
 selected_sourceOption = StringVar()
 selected_sourceOption.set("Select an option") 
 options = ["Income", "Family help", "business profit"]
-source_dropdown = OptionMenu(moneyIn_frame, selected_sourceOption, *options)
+source_dropdown = OptionMenu(middle_frame, selected_sourceOption, *options)
 
-my_button7 = Button(moneyIn_frame, text="Enter", command= money_in)
-my_button8 = Button(moneyIn_frame, text="Back", command= lambda: show_frame(front_page))
+# Entries
+my_entry3 = Entry(up_frame, borderwidth=1, relief="solid")
 
-my_label5.grid(row=0, column=0)
-my_entry3.grid(row=1,column=0)
-source_label.grid(row=2,column=0)
-source_dropdown.grid(row=2,column=1)
-my_button7.grid(row=3, column=0)
-my_button8.grid(row=3, column=1)
-moneyin_message.grid(row=4, column=0)
+# buttons
+my_button7 = Button(button_frame, text="Enter", command= money_in)
+my_button8 = Button(button_frame, text="Back", command= front_page_display)
 
+
+# Grid label
+my_label5.grid(row=0, column=0, pady=20)
+source_label.grid(row=0,column=0)
+moneyin_message.grid(row=1, column=0)
+
+# Grid drop_down
+source_dropdown.grid(row=0,column=1)
+
+# Grid entry
+my_entry3.grid(row=1,column=0, ipadx=30, ipady=4)
+
+# Grid Button
+my_button7.grid(row=0, column=0, ipady=7, ipadx=15, padx=20)
+my_button8.grid(row=0, column=1, ipady=7, ipadx=15)
+
+# Pack Frames
+up_frame.pack()
+middle_frame.pack(pady=20)
+button_frame.pack()
 moneyIn_frame.pack()
 
-####################################### front page frame ##############################
-front_page = Frame(window)
-
-my_label4 = Label(front_page, text="Select what action you want to do")
-budget_front_page_label = Label(front_page, text="", fg='green')
-
-my_button1 = Button(front_page, text="MoneyIn", command=lambda: show_frame(moneyIn_frame))
-my_button2 = Button(front_page, text="MoneyOut", command=lambda: show_frame(moneyOut_frame))
-my_button3 = Button(front_page, text="Set Budget",command=lambda: show_frame(budget_frame) )
-my_button4 = Button(front_page, text="Transcation Report", command=lambda: show_frame(report_frame))
-my_button5 = Button(front_page, text="Transcation Summary", command=lambda: show_frame(summary_frame))
-my_button6 = Button(front_page, text="LogOut", command=lambda: show_frame(login_frame))
-
-
-my_label4.grid(row=0, column=0)
-budget_front_page_label.grid(row=1, column=0)
-my_button1.grid(row=2, column=0)
-my_button2.grid(row=3, column=0)
-my_button3.grid(row=4, column=0)
-my_button4.grid(row=5, column=0)
-my_button5.grid(row=6, column=0)
-my_button6.grid(row=7, column=0)
-
-
-front_page.pack()
-
-###################### MoneyOut_Frame ##################
+###################### MoneyOut_Frame ######################################################################################################################
 
 moneyOut_frame = Frame(window)
+first_frame = Frame(moneyOut_frame)
+second_frame = Frame(moneyOut_frame)
+button_frame = Frame(moneyOut_frame)
+last_frame = Frame(moneyOut_frame)
 
-my_label5 = Label(moneyOut_frame, text="Enter the Amount of money you spent")
-my_entry = Entry(moneyOut_frame, placeholder="Enter Amount")
+my_label5 = Label(first_frame, text="Enter the Amount of money you spent")
+my_label5.config(font=("Helvetica", 10, "bold"))
+my_entry = Entry(first_frame, borderwidth=1, relief="solid")
 
-my_label6 = Label(moneyOut_frame, text="transaction means")
+my_label6 = Label(second_frame, text="Transaction means")
+my_label6.config(font=("Helvetica", 10, "bold"))
 selected_meansOption = StringVar()
 selected_meansOption.set("Select an option") 
 options = ["Mobile Money", "Bank Transfer", "Credit/Debit card", "Cash"]
-dropdown = OptionMenu(moneyOut_frame, selected_meansOption, *options)
+dropdown = OptionMenu(second_frame, selected_meansOption, *options)
 
-my_label7 = Label(moneyOut_frame, text="Category")
+my_label7 = Label(second_frame, text="Category")
+my_label7.config(font=("Helvetica", 10, "bold"))
 selected_categoryOption = StringVar()
 selected_categoryOption.set("Select an option") 
 options = ["Entertainment", "Groceries", "Transportation", "Work"]
-dropdown1 = OptionMenu(moneyOut_frame, selected_categoryOption, *options)
+dropdown1 = OptionMenu(second_frame, selected_categoryOption, *options)
 
-my_button9 = Button(moneyOut_frame, text="Enter", command=money_out)
-back_button = Button(moneyOut_frame, text="Back", command= lambda: show_frame(front_page))
-moneyout_message = Label(moneyOut_frame, text="", fg='green')
+my_button9 = Button(button_frame, text="Enter", command=money_out)
+back_button = Button(button_frame, text="Back", command=front_page_display)
+moneyout_message = Label(last_frame, text="", fg='green')
 
 ### add a sub category
-my_label5.grid(row=0, column=0)
-my_entry.grid(row=1, column=0)
-my_label6.grid(row=2, column=0)
-dropdown.grid(row=2, column=1)
-my_label7.grid(row=3, column=0)
-dropdown1.grid(row=3, column=1)
-my_button9.grid(row=4, column=0)
-back_button.grid(row=4, column=1)
-moneyout_message.grid(row=5, column=0)
+my_label5.grid(row=0, column=0, pady=20)
+my_entry.grid(row=1, column=0, ipadx=30, ipady=4)
+my_label6.grid(row=0, column=0, pady=20)
+dropdown.grid(row=0, column=1)
+my_label7.grid(row=1, column=0)
+dropdown1.grid(row=1, column=1)
+my_button9.grid(row=0, column=0, ipady=7, ipadx=15, padx=20)
+back_button.grid(row=0, column=1, ipady=7, ipadx=15)
+moneyout_message.grid(row=0, column=0)
 
+first_frame.pack()
+second_frame.pack()
+button_frame.pack(pady=20)
+last_frame.pack()
 moneyOut_frame.pack()
 
 ##################### set Budget frame########################################################
